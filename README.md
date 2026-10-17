@@ -9,6 +9,7 @@
   [![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
   [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
   [![IMAP](https://img.shields.io/badge/Mail-IMAP%20over%20SSL-4B5563)](https://www.rfc-editor.org/rfc/rfc3501)
+  [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0.html)
 </div>
 
 Cleanbox is a local, privacy-first web application for finding and removing bulk marketing emails while protecting receipts, bookings, financial records, account alerts, and other important messages. It also surfaces the largest messages so you can reclaim the most storage with the least effort.
@@ -83,7 +84,7 @@ cleanbox/
 
 ## License
 
-No license has been selected yet. Until a license is added, the source is available for viewing but should not be assumed to be reusable. Contributions and licensing discussions are welcome through GitHub issues.
+Cleanbox is licensed under the [GNU Affero General Public License v3.0](LICENSE). See the license file for the complete terms.
 
 <div align="center">
   <sub>Built for a cleaner, calmer inbox.</sub>
