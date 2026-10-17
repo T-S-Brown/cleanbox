@@ -253,40 +253,40 @@ def get_mock_emails(max_emails=None, order="newest"):
         # --- GENERAL / PERSONAL (SOME LARGE ATTACHMENTS) ---
         {
             "id": "mock_17",
-            "message_id": "<mock_17@gmail.com>",
+            "message_id": "<mock_17@example.com>",
             "subject": "Photos and 4K Video Clips from Lake District Weekend Hike",
-            "sender": "david.walker@gmail.com",
+            "sender": "friend@example.com",
             "recipient": "user@example.com",
             "date": (now - timedelta(days=13)).strftime("%a, %d %b %Y %H:%M:%S +0000"),
             "size_bytes": 22_500_000, # 22.5 MB (Heavy personal attachment)
             "headers": {
-                "message-id": "<mock_17@gmail.com>"
+                "message-id": "<mock_17@example.com>"
             },
-            "body_snippet": "Hey Thomas! Here are the high-res photos and video clips from our Scafell Pike hike last Saturday. Hope you like them!"
+            "body_snippet": "Here are the high-res photos and video clips from our weekend hike. Hope you like them!"
         },
         {
             "id": "mock_18",
-            "message_id": "<mock_18@company.com>",
+            "message_id": "<mock_18@example.com>",
             "subject": "Catch up for lunch next Tuesday?",
-            "sender": "claire.jenkins@company.com",
+            "sender": "colleague@example.com",
             "recipient": "user@example.com",
             "date": (now - timedelta(days=1)).strftime("%a, %d %b %Y %H:%M:%S +0000"),
             "size_bytes": 25_000,
             "headers": {
-                "message-id": "<mock_18@company.com>"
+                "message-id": "<mock_18@example.com>"
             },
-            "body_snippet": "Hi, let me know if you are free around 1pm next Tuesday for a quick sandwich and coffee near Oxford Circus!"
+            "body_snippet": "Hi, let me know if you are free around lunchtime next Tuesday for a quick catch-up!"
         },
         {
             "id": "mock_19",
-            "message_id": "<mock_19@freelancedesign.org>",
+            "message_id": "<mock_19@example.com>",
             "subject": "Project Architecture Diagram & PDF Blueprint",
-            "sender": "alex.m@freelancedesign.org",
+            "sender": "designer@example.com",
             "recipient": "user@example.com",
             "date": (now - timedelta(days=16)).strftime("%a, %d %b %Y %H:%M:%S +0000"),
             "size_bytes": 7_800_000, # 7.8 MB
             "headers": {
-                "message-id": "<mock_19@freelancedesign.org>"
+                "message-id": "<mock_19@example.com>"
             },
             "body_snippet": "Attached is the latest revision of the wireframes, system architecture blueprint, and exportable vector assets."
         },
