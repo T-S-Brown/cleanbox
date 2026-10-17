@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cleanbox - Gmail & Hotmail</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              500: '#0284c7',
+              600: '#0369a1',
+              700: '#075985',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/static/styles.css" />
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans antialiased">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center text-white shadow-md">
+          <i data-lucide="mail-check" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-slate-900 leading-tight">Cleanbox</h1>
+          <p class="text-xs text-slate-500">Safely free up storage • Marketing deletion & Size flagging</p>
+        </div>
+      </div>
+
+      <!-- Header actions / status -->
+      <div id="header-status" class="flex items-center gap-3">
+        <button id="btn-demo-quick" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition flex items-center gap-1.5">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+          Try Demo Mailbox
+        </button>
+        <button id="btn-open-bin-history" class="hidden text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 transition items-center gap-1.5 shadow-sm">
+          <i data-lucide="archive-restore" class="w-3.5 h-3.5 text-sky-600"></i>
+          <span>Bin &amp; Undo History (<span id="bin-batches-badge">0</span>)</span>
+        </button>
+        <div id="connected-badge" class="hidden items-center gap-2 bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-full text-xs font-medium">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span id="connected-email-label">Connected</span>
+          <button id="btn-disconnect" class="text-slate-400 hover:text-slate-700 ml-1" title="Disconnect">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+    <!-- CONNECTION PANEL (Shown when disconnected) -->
+    <section id="connection-section" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 max-w-3xl mx-auto transition-all">
+      <div class="text-center max-w-lg mx-auto mb-8">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-sky-100 text-sky-600 mb-3">
+          <i data-lucide="inbox" class="w-6 h-6"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-900">Connect Your Mailbox</h2>
+        <p class="text-sm text-slate-500 mt-1">Connect your Gmail or Hotmail/Outlook account securely using an App Password to scan storage and clean marketing spam.</p>
+      </div>
+
+      <!-- Provider Tabs -->
+      <div class="flex rounded-xl bg-slate-100 p-1 mb-6 max-w-md mx-auto">
+        <button data-provider="gmail" class="provider-tab flex-1 py-2 text-xs font-semibold rounded-lg text-slate-700 transition flex items-center justify-center gap-2 bg-white shadow-sm">
+          <svg class="w-4 h-4" viewBox="0 0 24 24">
+            <path fill="#EA4335" d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.146C21.69 2.28 24 3.434 24 5.457z"/>
+          </svg>
+          Gmail
+        </button>
+        <button data-provider="hotmail" class="provider-tab flex-1 py-2 text-xs font-semibold rounded-lg text-slate-600 transition flex items-center justify-center gap-2 hover:text-slate-900">
+          <svg class="w-4 h-4" viewBox="0 0 24 24">
+            <path fill="#0078D4" d="M24 7.6v8.8c0 1.99-1.61 3.6-3.6 3.6H14V4h6.4c1.99 0 3.6 1.61 3.6 3.6zm-11.6 12.4H3.6C1.61 20 0 18.39 0 16.4V7.6C0 5.61 1.61 4 3.6 4h8.8v16z"/>
+          </svg>
+          Hotmail / Outlook
+        </button>
+        <button data-provider="custom" class="provider-tab flex-1 py-2 text-xs font-semibold rounded-lg text-slate-600 transition flex items-center justify-center gap-2 hover:text-slate-900">
+          <i data-lucide="server" class="w-4 h-4 text-slate-500"></i>
+          Custom IMAP
+        </button>
+      </div>
+
+      <!-- Connection Form -->
+      <form id="connect-form" class="space-y-4 max-w-md mx-auto">
+        <div id="custom-server-fields" class="hidden space-y-3 pb-2 border-b border-slate-100">
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">IMAP Host</label>
+            <input type="text" id="input-host" placeholder="e.g. mail.example.com" class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:outline-none" />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">Port</label>
+              <input type="number" id="input-port" value="993" class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:outline-none" />
+            </div>
+            <div class="flex items-center pt-5">
+              <label class="inline-flex items-center cursor-pointer text-xs font-medium text-slate-700">
+                <input type="checkbox" id="input-ssl" checked class="rounded border-slate-300 text-sky-600 focus:ring-sky-500 mr-2" />
+                Use SSL / TLS
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">Email Address</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+              <i data-lucide="at-sign" class="w-4 h-4"></i>
+            </span>
+            <input type="email" id="input-email" required placeholder="you@gmail.com" class="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:outline-none" />
+          </div>
+        </div>
+
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-xs font-medium text-slate-700">App Password</label>
+            <a id="help-app-pw-link" href="https://myaccount.google.com/apppasswords" target="_blank" class="text-xs text-sky-600 hover:text-sky-800 font-medium flex items-center gap-1">
+              How to create one <i data-lucide="external-link" class="w-3 h-3"></i>
+            </a>
+          </div>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+              <i data-lucide="key" class="w-4 h-4"></i>
+            </span>
+            <input type="password" id="input-password" required placeholder="16-character app password" class="w-full text-sm pl-10 pr-10 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:outline-none" />
+            <button type="button" id="btn-toggle-pw" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+              <i data-lucide="eye" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1">Use a dedicated <strong>App Password</strong> generated from your provider's security settings (never your master login password).</p>
+        </div>
+
+        <!-- Connection error alert -->
+        <div id="connect-error" class="hidden p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs"></div>
+
+        <button type="submit" id="btn-connect" class="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm transition shadow-md flex items-center justify-center gap-2">
+          <span>Connect & Open Mailbox</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+
+        <div class="relative flex py-2 items-center">
+          <div class="flex-grow border-t border-slate-200"></div>
+          <span class="flex-shrink mx-4 text-xs text-slate-400 font-medium">or test instantly</span>
+          <div class="flex-grow border-t border-slate-200"></div>
+        </div>
+
+        <button type="button" id="btn-demo-mode" class="w-full py-2.5 px-4 rounded-xl border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 font-semibold text-sm transition flex items-center justify-center gap-2">
+          <i data-lucide="play" class="w-4 h-4"></i>
+          Launch Sandbox Demo (Pre-loaded Mailbox)
+        </button>
+      </form>
+
+      <!-- App Password Helper Accordion -->
+      <div class="mt-8 border-t border-slate-100 pt-6 max-w-md mx-auto">
+        <details class="group text-xs text-slate-600">
+          <summary class="cursor-pointer font-semibold text-slate-800 flex items-center justify-between list-none py-1">
+            <span class="flex items-center gap-2">
+              <i data-lucide="help-circle" class="w-4 h-4 text-sky-500"></i>
+              Why do I need an App Password?
+            </span>
+            <i data-lucide="chevron-down" class="w-4 h-4 transition group-open:rotate-180"></i>
+          </summary>
+          <div class="mt-2 space-y-2 text-slate-600 leading-relaxed bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+            <p>Major email providers (Google and Microsoft) require an <strong>App Password</strong> instead of your regular password for third-party IMAP applications.</p>
+            <div id="guide-steps" class="space-y-1 font-mono text-[11px] bg-white p-2.5 rounded-lg border border-slate-200">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- DASHBOARD PANEL (Shown when connected) -->
+    <div id="dashboard-section" class="hidden space-y-6">
+
+      <!-- Mailbox Bar & Scan Trigger -->
+      <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700 font-bold text-sm" id="user-avatar">
+            U
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="current-user-email" class="text-sm font-bold text-slate-900">user@example.com</span>
+              <span id="badge-demo-tag" class="hidden px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-700">SANDBOX DEMO</span>
+            </div>
+            <div class="text-xs text-slate-500 flex items-center gap-2 mt-0.5">
+              <span>Folder:</span>
+              <select id="select-folder" class="text-xs font-medium bg-slate-50 border border-slate-300 rounded-lg px-2 py-0.5 focus:outline-none">
+                <option value="INBOX">INBOX</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 flex-wrap">
+          <div class="flex items-center gap-1.5 text-xs text-slate-600">
+            <span class="font-medium">Scan Scope:</span>
+            <select id="select-max-emails" class="text-xs font-semibold bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm">
+              <option value="all_oldest" selected>Entire Inbox (from the start - oldest first) ⭐</option>
+              <option value="all_newest">Entire Inbox (newest first)</option>
+              <option value="500_oldest">First 500 emails (from the start)</option>
+              <option value="500_newest">Latest 500 emails</option>
+              <option value="1000_oldest">First 1,000 emails (from the start)</option>
+              <option value="1000_newest">Latest 1,000 emails</option>
+              <option value="100_newest">Latest 100 emails (quick check)</option>
+            </select>
+          </div>
+
+          <button id="btn-start-scan" class="py-2 px-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-semibold text-xs transition shadow-sm flex items-center gap-2">
+            <i data-lucide="scan" class="w-4 h-4"></i>
+            <span>Scan Storage</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Scanning Progress Alert -->
+      <div id="scan-progress-box" class="hidden bg-sky-50 border border-sky-200 rounded-2xl p-4 transition-all">
+        <div class="flex items-center justify-between text-xs font-semibold text-sky-900 mb-2">
+          <span id="scan-status-message" class="flex items-center gap-2">
+            <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-sky-600"></i>
+            Scanning emails and headers...
+          </span>
+          <span id="scan-status-percent">0%</span>
+        </div>
+        <div class="w-full bg-sky-200 rounded-full h-2 overflow-hidden">
+          <div id="scan-progress-bar" class="bg-sky-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- METRIC CARDS -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Total Scanned -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Mailbox Analyzed</p>
+              <h3 id="stat-total-size" class="text-2xl font-extrabold text-slate-900 mt-1">0 MB</h3>
+              <p id="stat-total-count" class="text-xs text-slate-500 mt-1">0 emails scanned</p>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-100 text-slate-600">
+              <i data-lucide="database" class="w-5 h-5"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Marketing (Safe Clean Target) -->
+        <div class="bg-white p-5 rounded-2xl border border-emerald-200 shadow-sm bg-gradient-to-br from-emerald-50/40 to-white relative overflow-hidden">
+          <div class="flex justify-between items-start">
+            <div>
+              <div class="flex items-center gap-1.5">
+                <p class="text-xs font-semibold text-emerald-700 uppercase tracking-wider">Safe to Clean</p>
+                <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Marketing</span>
+              </div>
+              <h3 id="stat-marketing-size" class="text-2xl font-extrabold text-emerald-600 mt-1">0 MB</h3>
+              <p id="stat-marketing-count" class="text-xs text-emerald-700 mt-1">0 marketing emails found</p>
+            </div>
+            <div class="p-2.5 rounded-xl bg-emerald-100 text-emerald-700">
+              <i data-lucide="trash-2" class="w-5 h-5"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Large Emails Flagged -->
+        <div class="bg-white p-5 rounded-2xl border border-amber-200 shadow-sm bg-gradient-to-br from-amber-50/30 to-white relative overflow-hidden">
+          <div class="flex justify-between items-start">
+            <div>
+              <div class="flex items-center gap-1.5">
+                <p class="text-xs font-semibold text-amber-700 uppercase tracking-wider">Flagged Large</p>
+                <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-100 text-amber-800">&gt; 1 MB</span>
+              </div>
+              <h3 id="stat-large-size" class="text-2xl font-extrabold text-amber-600 mt-1">0 MB</h3>
+              <p id="stat-large-count" class="text-xs text-amber-700 mt-1">0 high-impact emails</p>
+            </div>
+            <div class="p-2.5 rounded-xl bg-amber-100 text-amber-700">
+              <i data-lucide="file-warning" class="w-5 h-5"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Safeguarded Emails -->
+        <div class="bg-white p-5 rounded-2xl border border-sky-200 shadow-sm bg-gradient-to-br from-sky-50/30 to-white relative overflow-hidden">
+          <div class="flex justify-between items-start">
+            <div>
+              <div class="flex items-center gap-1.5">
+                <p class="text-xs font-semibold text-sky-800 uppercase tracking-wider">Safeguarded</p>
+                <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-sky-100 text-sky-800">Protected</span>
+              </div>
+              <h3 id="stat-protected-count" class="text-2xl font-extrabold text-sky-700 mt-1">0</h3>
+              <p class="text-xs text-sky-700 mt-1">Purchases, bookings, tickets</p>
+            </div>
+            <div class="p-2.5 rounded-xl bg-sky-100 text-sky-700">
+              <i data-lucide="shield-check" class="w-5 h-5"></i>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MAIN TABS & ACTION BAR -->
+      <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <!-- Tabs -->
+        <div class="border-b border-slate-200 bg-slate-50/70 px-4 sm:px-6 pt-3 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex space-x-1 sm:space-x-2 overflow-x-auto pb-px" id="category-tabs">
+            <button data-cat="marketing" class="cat-tab px-3.5 py-2 text-xs font-bold rounded-t-xl border-b-2 border-emerald-600 text-emerald-700 bg-white transition flex items-center gap-2">
+              <i data-lucide="megaphone" class="w-3.5 h-3.5"></i>
+              Marketing Spam (<span id="tab-cnt-marketing">0</span>)
+            </button>
+            <button data-cat="large" class="cat-tab px-3.5 py-2 text-xs font-medium rounded-t-xl border-b-2 border-transparent text-slate-600 hover:text-slate-900 transition flex items-center gap-2">
+              <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-500"></i>
+              Flagged Large Emails (<span id="tab-cnt-large">0</span>)
+            </button>
+            <button data-cat="protected" class="cat-tab px-3.5 py-2 text-xs font-medium rounded-t-xl border-b-2 border-transparent text-slate-600 hover:text-slate-900 transition flex items-center gap-2">
+              <i data-lucide="shield" class="w-3.5 h-3.5 text-sky-600"></i>
+              Protected Receipts &amp; Bookings (<span id="tab-cnt-protected">0</span>)
+            </button>
+            <button data-cat="senders" class="cat-tab px-3.5 py-2 text-xs font-medium rounded-t-xl border-b-2 border-transparent text-slate-600 hover:text-slate-900 transition flex items-center gap-2">
+              <i data-lucide="users" class="w-3.5 h-3.5"></i>
+              Clean by Sender
+            </button>
+            <button data-cat="all" class="cat-tab px-3.5 py-2 text-xs font-medium rounded-t-xl border-b-2 border-transparent text-slate-600 hover:text-slate-900 transition flex items-center gap-2">
+              <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+              All Scanned (<span id="tab-cnt-all">0</span>)
+            </button>
+          </div>
+
+          <!-- Quick Clean Buttons (Visible in Marketing & Large tabs) -->
+          <div id="quick-action-bar" class="flex items-center gap-2 pb-2 sm:pb-0">
+            <button id="btn-select-all" class="text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 transition">
+              Select All
+            </button>
+            <button id="btn-deselect-all" class="text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 transition">
+              Clear
+            </button>
+            <button id="btn-dry-run" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-indigo-300 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition flex items-center gap-1.5 shadow-sm" title="Simulate cleaning without modifying or deleting emails">
+              <i data-lucide="play-circle" class="w-3.5 h-3.5"></i>
+              Dry Run (Preview Clean)
+            </button>
+            <button id="btn-delete-selected" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white transition shadow-sm flex items-center gap-1.5">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              Clean Selected (<span id="selected-count-badge">0</span>)
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="p-4 border-b border-slate-200 bg-white flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3 flex-1 min-w-[240px]">
+            <div class="relative w-full max-w-sm">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <i data-lucide="search" class="w-4 h-4"></i>
+              </span>
+              <input type="text" id="filter-search" placeholder="Filter subject, sender or keyword..." class="w-full text-xs pl-9 pr-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:outline-none" />
+            </div>
+
+            <!-- Size filter -->
+            <select id="filter-min-size" class="text-xs font-medium bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 focus:outline-none">
+              <option value="0">Any size</option>
+              <option value="0.5">&gt; 500 KB</option>
+              <option value="1">&gt; 1 MB (Large)</option>
+              <option value="5">&gt; 5 MB (Very Large)</option>
+              <option value="10">&gt; 10 MB (Huge)</option>
+            </select>
+          </div>
+
+          <!-- Sort -->
+          <div class="flex items-center gap-2 text-xs text-slate-600">
+            <span>Sort by:</span>
+            <select id="sort-selector" class="text-xs font-medium bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 focus:outline-none">
+              <option value="size_desc">Largest size first ⚡</option>
+              <option value="size_asc">Smallest size first</option>
+              <option value="score_desc">Highest marketing confidence</option>
+              <option value="date_desc">Newest first</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Email List Container -->
+        <div id="email-list-container" class="overflow-x-auto min-h-[300px]">
+          <table class="w-full text-left text-xs text-slate-700">
+            <thead class="bg-slate-50/80 text-slate-500 uppercase font-semibold border-b border-slate-200 text-[11px]">
+              <tr>
+                <th class="p-3 w-10 text-center">
+                  <input type="checkbox" id="check-all-table" class="rounded border-slate-300 text-sky-600 focus:ring-sky-500" />
+                </th>
+                <th class="p-3 w-32">Status / Safety</th>
+                <th class="p-3">Subject &amp; Snippet</th>
+                <th class="p-3 w-48">Sender</th>
+                <th class="p-3 w-28 text-right">Size (Flags)</th>
+                <th class="p-3 w-24 text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="email-table-body" class="divide-y divide-slate-100">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+
+          <!-- Empty State -->
+          <div id="empty-state" class="hidden py-16 text-center text-slate-400">
+            <i data-lucide="inbox" class="w-10 h-10 mx-auto text-slate-300 mb-2"></i>
+            <p class="text-sm font-medium text-slate-600">No emails match the selected filters</p>
+            <p class="text-xs text-slate-400 mt-1">Try switching tabs or resetting the search filter.</p>
+          </div>
+        </div>
+
+        <!-- Sender Aggregation View (shown when "Clean by Sender" tab is active) -->
+        <div id="sender-view-container" class="hidden p-6">
+          <div class="mb-4 flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">Top Marketers by Storage Consumed</h3>
+              <p class="text-xs text-slate-500">Quickly clean all marketing emails sent by high-volume retail or promotion senders.</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="sender-cards-grid">
+            <!-- Dynamically populated sender cards -->
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- MODAL: DRY RUN / CLEAN PREVIEW -->
+  <div id="modal-preview" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-150">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2.5 text-indigo-600">
+          <div class="p-2 rounded-xl bg-indigo-100 text-indigo-700">
+            <i data-lucide="play-circle" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Dry Run Clean Simulation</h3>
+            <p class="text-xs text-slate-500">Preview exact space savings and safety before making changes</p>
+          </div>
+        </div>
+        <button class="modal-close text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="overflow-y-auto space-y-4 flex-1 pr-1">
+        <!-- Dry Run Mode Callout -->
+        <div class="bg-gradient-to-r from-indigo-50 to-sky-50 border border-indigo-200 rounded-xl p-3 flex items-center gap-2.5 text-xs text-indigo-950">
+          <i data-lucide="shield-check" class="w-4 h-4 text-indigo-600 flex-shrink-0"></i>
+          <span><strong>100% Non-Destructive Simulation:</strong> No emails have been moved or deleted. This preview shows the exact outcome if you proceed.</span>
+        </div>
+
+        <!-- Metrics Grid -->
+        <div class="grid grid-cols-3 gap-3">
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-center">
+            <span class="text-[10px] uppercase font-bold text-slate-400">Target Emails</span>
+            <p id="preview-target-count" class="text-xl font-extrabold text-slate-900 mt-0.5">0</p>
+          </div>
+          <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-center">
+            <span class="text-[10px] uppercase font-bold text-emerald-700">Space to Reclaim</span>
+            <p id="preview-space-freed" class="text-xl font-extrabold text-emerald-600 mt-0.5">0 MB</p>
+          </div>
+          <div class="p-3 bg-sky-50 border border-sky-200 rounded-xl text-center">
+            <span class="text-[10px] uppercase font-bold text-sky-700">Action Type</span>
+            <p id="preview-action-mode" class="text-xs font-bold text-sky-900 mt-1">Move to Bin (Undoable)</p>
+          </div>
+        </div>
+
+        <!-- Protected emails alert -->
+        <div id="preview-blocked-box" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900">
+          <div class="flex items-center gap-1.5 font-bold mb-1">
+            <i data-lucide="shield-check" class="w-4 h-4 text-amber-600"></i>
+            <span>Safeguard Active: <span id="preview-blocked-count">0</span> Protected Emails Preserved</span>
+          </div>
+          <p class="text-[11px] text-amber-800">Purchases, receipts, and flight/hotel bookings were automatically recognized and shielded from deletion.</p>
+        </div>
+
+        <!-- Top Senders in Dry Run -->
+        <div id="preview-senders-section" class="space-y-1.5">
+          <label class="font-bold text-slate-600 uppercase text-[10px]">Top Senders Targeted</label>
+          <div id="preview-senders-list" class="flex flex-wrap gap-2 text-xs">
+            <!-- Dynamically populated sender badges -->
+          </div>
+        </div>
+
+        <!-- Sample Emails List -->
+        <div class="space-y-1.5">
+          <label class="font-bold text-slate-600 uppercase text-[10px]">Sample Emails Targeted in this Dry Run</label>
+          <div id="preview-emails-table" class="border border-slate-200 rounded-xl max-h-44 overflow-y-auto divide-y divide-slate-100 bg-slate-50/50 text-xs">
+            <!-- Dynamically populated rows -->
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+        <span class="text-[11px] text-slate-500 flex items-center gap-1">
+          <i data-lucide="info" class="w-3.5 h-3.5 text-slate-400"></i>
+          Moving to Bin preserves messages for 30 days and supports 1-click Undo.
+        </span>
+        <div class="flex gap-2">
+          <button class="modal-close px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">Close</button>
+          <button id="btn-proceed-from-preview" class="px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition shadow-sm flex items-center gap-1.5">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            Proceed to Move to Bin
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DELETION CONFIRMATION & METHOD SELECTION -->
+  <div id="modal-confirm-delete" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center gap-3 text-red-600">
+        <div class="p-3 bg-red-100 rounded-xl">
+          <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-slate-900">Confirm Email Deletion</h3>
+          <p class="text-xs text-slate-500">Free up storage by removing selected marketing emails.</p>
+        </div>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-700">
+        <p>You are about to delete <strong id="confirm-email-count" class="text-slate-900">0 emails</strong> totaling <strong id="confirm-email-size" class="text-emerald-700">0 MB</strong>.</p>
+        
+        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+          <p class="font-semibold text-slate-800">Choose Deletion Type:</p>
+          <label class="flex items-start gap-2.5 cursor-pointer">
+            <input type="radio" name="delete-mode" value="trash" checked class="mt-0.5 text-sky-600 focus:ring-sky-500" />
+            <div>
+              <span class="font-semibold text-slate-900">Move to Trash / Bin (Recommended &amp; Safe)</span>
+              <p class="text-[11px] text-slate-500">Frees space while keeping emails recoverable in your provider's Trash folder. Includes instant 1-click Undo.</p>
+            </div>
+          </label>
+          <label class="flex items-start gap-2.5 cursor-pointer pt-1">
+            <input type="radio" name="delete-mode" value="permanent" class="mt-0.5 text-red-600 focus:ring-red-500" />
+            <div>
+              <span class="font-semibold text-red-700">Permanently Delete (EXPUNGE)</span>
+              <p class="text-[11px] text-slate-500">Irreversibly deletes messages immediately to maximize available storage (Cannot be undone).</p>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="flex justify-between items-center gap-2 pt-2">
+        <button type="button" id="btn-modal-dry-run" class="px-3 py-2 rounded-xl text-xs font-semibold border border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition flex items-center gap-1.5 shadow-sm">
+          <i data-lucide="play-circle" class="w-3.5 h-3.5"></i>
+          Dry Run First
+        </button>
+        <div class="flex gap-2">
+          <button class="modal-close px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">Cancel</button>
+          <button id="btn-execute-delete" class="px-4 py-2 rounded-xl text-xs font-semibold bg-red-600 hover:bg-red-700 text-white transition shadow-sm flex items-center gap-1.5">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            Confirm &amp; Clean Now
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EMAIL DETAILS & CLASSIFICATION REASONS -->
+  <div id="modal-email-detail" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between">
+        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <i data-lucide="file-text" class="w-4 h-4 text-slate-500"></i>
+          Email Diagnostic &amp; Classification Details
+        </h3>
+        <button class="modal-close text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="font-bold text-slate-500 uppercase text-[10px]">Subject</label>
+          <p id="detail-subject" class="text-sm font-bold text-slate-900 mt-0.5"></p>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="font-bold text-slate-500 uppercase text-[10px]">Sender</label>
+            <p id="detail-sender" class="font-mono text-slate-800 break-all"></p>
+          </div>
+          <div>
+            <label class="font-bold text-slate-500 uppercase text-[10px]">Size</label>
+            <p id="detail-size" class="font-bold text-slate-800"></p>
+          </div>
+        </div>
+
+        <!-- Classification Explanation -->
+        <div class="p-3.5 rounded-xl border" id="detail-classification-box">
+          <div class="flex items-center gap-2 font-bold mb-1" id="detail-category-badge"></div>
+          <ul id="detail-reasons-list" class="list-disc pl-5 space-y-1 text-slate-700"></ul>
+        </div>
+
+        <div>
+          <label class="font-bold text-slate-500 uppercase text-[10px]">Snippet / Preview</label>
+          <div id="detail-snippet" class="p-3 bg-slate-50 rounded-xl text-slate-600 border border-slate-200 font-sans text-xs max-h-32 overflow-y-auto"></div>
+        </div>
+
+        <div>
+          <label class="font-bold text-slate-500 uppercase text-[10px]">Key Detected Headers</label>
+          <pre id="detail-headers" class="p-3 bg-slate-900 text-slate-200 rounded-xl text-[11px] font-mono overflow-x-auto max-h-32"></pre>
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button class="modal-close px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: BIN & UNDO HISTORY -->
+  <div id="modal-bin-history" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2.5 text-sky-600">
+          <div class="p-2 rounded-xl bg-sky-100 text-sky-700">
+            <i data-lucide="archive-restore" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Bin &amp; Undo History</h3>
+            <p class="text-xs text-slate-500">Restore emails moved to the provider's Trash back to your Inbox.</p>
+          </div>
+        </div>
+        <button class="modal-close text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div id="bin-history-list" class="space-y-3 overflow-y-auto flex-1 pr-1 text-xs">
+        <!-- Dynamically populated batches -->
+      </div>
+
+      <div class="flex justify-end pt-3 border-t border-slate-100">
+        <button class="modal-close px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING UNDO TOAST -->
+  <div id="undo-toast" class="fixed bottom-6 right-6 z-50 hidden max-w-md bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center justify-between gap-4 animate-in slide-in-from-bottom duration-200">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0">
+        <i data-lucide="archive" class="w-4 h-4"></i>
+      </div>
+      <div>
+        <p id="undo-toast-text" class="text-xs font-semibold text-slate-100">Moved 5 emails to Bin.</p>
+        <p class="text-[10px] text-slate-400">Recoverable from provider Trash folder</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 flex-shrink-0">
+      <button id="btn-toast-undo" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition flex items-center gap-1.5 shadow">
+        <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
+        <span>Undo Delete</span>
+      </button>
+      <button id="btn-toast-dismiss" class="text-slate-400 hover:text-white p-1">
+        <i data-lucide="x" class="w-3.5 h-3.5"></i>
+      </button>
+    </div>
+  </div>
+
+  <footer class="mt-auto py-6 border-t border-slate-200 text-center text-xs text-slate-400">
+    Cleanbox &bull; Safe marketing email purge &bull; Local &amp; Private &bull; Gmail &amp; Hotmail
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
